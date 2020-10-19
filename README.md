@@ -23,3 +23,9 @@
 * [ ] Retrieve the data from the dictionary
 * [ ] Query response time
 * [ ] Measure the efficiency using precision,recall,F measure.
+
+## Dependencies
+
+* nltk
+  * punkt
+  * WordNet
