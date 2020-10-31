@@ -1,9 +1,12 @@
+from utils import lemmatize_sentence
+
 import json
 import math
 import pickle
 from nltk.stem import WordNetLemmatizer 
 from nltk import word_tokenize
 import time
+
 """
 sample input:
 {
@@ -46,14 +49,13 @@ sample input:
 
 
 def getTokens(searchQuery):
-    lemmatizer = WordNetLemmatizer()
-    terms = [lemmatizer.lemmatize(word) for word in word_tokenize(searchQuery)] 
+    terms = lemmatize_sentence(searchQuery)
     return [term for term in terms if term.isalnum()]
 
 
 def searchOnlyTerms(searchTerms, invertedIndex, topK, N):
     rankDict = {}
-    #searchTerms = getTokens(jsonInput["query"]["search"].lower())
+    searchTerms = getTokens(searchTerms)
     #N = max(invertedIndex,key=lambda x: int(x))
     #N = 279 #change based on len
     # iterating through all of the query terms
