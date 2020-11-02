@@ -1,3 +1,5 @@
+from utils import lemmatize_sentence
+
 from pandas import read_csv
 from nltk.stem import WordNetLemmatizer 
 from nltk import word_tokenize
@@ -10,7 +12,7 @@ import os
 
 #Consts
 #csvFile = read_csv("combinedCSV.csv")
-lemmatizer = WordNetLemmatizer()
+
 # TODO POS tagging and lemmatize based on pos
 
 """
@@ -26,6 +28,7 @@ print("better :", lemmatizer.lemmatize("better", pos ="a"))
 # https://btrees.readthedocs.io/en/latest/api.html
 
 
+
 def createDictionaryFromRow(row, headers):
     dictionary = { k:row[k] for k in headers }
     return dictionary
@@ -34,7 +37,7 @@ def createIndex(csvFileName):
 # iterate through all of the snippets in the dataset
     invertedIndex = OOBTree()
     docInfo = dict()
-    csvFile = read_csv(f"../../TelevisionNews/{csvFileName}")
+    csvFile = read_csv(f"..\..\TelevisionNews\{csvFileName}")
     for docId in range(len(csvFile)):
         #Json file for each doc { docID : { URL : "" , Snippet :""}}
         docInfo[docId] = createDictionaryFromRow(csvFile.iloc[docId], csvFile.columns)
@@ -42,9 +45,11 @@ def createIndex(csvFileName):
         #listOfWords = word_tokenize(csvFile['Snippet'][docId].lower())
 
         listOfWords = [x for x in word_tokenize(csvFile['Snippet'][docId].lower()) if x.isalnum()]
+        listOfWords = lemmatize_sentence(listOfWords)
+
         for pos in range(len(listOfWords)):
-            words = listOfWords[pos]
-            lemWord = lemmatizer.lemmatize(words)
+            lemWord = listOfWords[pos]
+            #lemWord = lemmatizer.lemmatize(words)
             #remove unwanted characters such -
 
             if(lemWord.isalnum()): 
@@ -79,12 +84,12 @@ def createIndex(csvFileName):
                 object of linked list ------------> (1,4)->(2,4)
         }
     """
-    with open(f'../indexes/{csvFileName[:-4]}.pickle', 'wb') as handle:
+    with open(f'..\indexes\{csvFileName[:-4]}.pickle', 'wb') as handle:
         pickle.dump(invertedIndex, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open(f'../documentInfo/{csvFileName[:-4]}.json', 'w') as f:
+    with open(f'..\documentInfo\{csvFileName[:-4]}.json', 'w') as f:
         dump(docInfo, f)
 
-all_filenames = os.listdir("../../TelevisionNews/")
+all_filenames = os.listdir("..\..\TelevisionNews\\")
 for i in range(len(all_filenames)):
     createIndex(all_filenames[i])
