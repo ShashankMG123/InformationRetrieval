@@ -41,3 +41,8 @@ def openOnePair(fileName):
     
     return [docInfo , invertedIndex]
 
+
+def openBigram(fileName):
+    with open(f"../bigramIndex/{fileName}.pickle", 'rb') as file:
+        bigramIndex = pickle.load(file)
+    return bigramIndex

@@ -1,34 +1,51 @@
-from utils import openOnePair
+from utils import openOnePair, openBigram
 from simpleSearch import searchOnlyTerms
 from phraseQuery import searchPhrase
+from wildcardQuery import wildCardQuery
 import json
 import pickle
 import time
 import os
-"""
+
 sampleInput = {
                     "query":
                     {
-                        "mode":0,
+                        "mode":1,
                         "fileName" : "BBCNEWS.201701",
-                        "search" : ["got" , "getting"],
+                        "search" : ["gotobibjijfgs"],
                         "top":3
                     }
                 }
+
+
 """
-# search: this is my name 
 sampleInput = {
                   "query":
                     {
                         "mode":1,
                         "fileName" : "BBCNEWS.201701",
-                        "must" : "nino weather" ,
+                        "wildcard" : "*v*" ,
+                        "top":5
+                    } 
+                }
+
+"""
+# search: this is my name 
+"""
+sampleInput = {
+                  "query":
+                    {
+                        "mode":0,
+                        "fileName" : "BBCNEWS.201701",
+                        "must" : "naskjfdbaofbaisobf" ,
                         "top":8
                     } 
                 }
+"""
 def simpleSearchOnOneFile(sampleInput):
 
     fileName = sampleInput["query"]["fileName"]
+    docInfo , invertedIndex = openOnePair(fileName)
     topK = sampleInput["query"]["top"] if "top" in sampleInput["query"] else 5
     searchTerms = [searchTerm.lower() for searchTerm in sampleInput["query"]["search"]]
 
@@ -70,15 +87,17 @@ def simpleSearchOnAllFiles(sampleInput):
         with open(picklePrefix+filePrefix+".pickle", 'rb') as file:
             invertedIndex = pickle.load(file)
 
-        result = searchPhrase(searchTerms, invertedIndex, topK)
+        result = searchOnlyTerms(searchTerms, invertedIndex, topK , max([int(x) for x in docInfo]))
 
         for res in range(len(result)):
             finalRes[filePrefix + "_" +str(result[res][0])] = {"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
     end = time.time()
-    for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
-        print(json.dumps({top:finalRes[top]}, indent=1))
-        
+    if(finalRes):
+        for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
+            print(json.dumps({top:finalRes[top]}, indent=1))
+    else:
+        print("{}")
     print(f"operation took: {end - start}")
 
 def simplePhraseOnOneFile(sampleInput):
@@ -93,6 +112,7 @@ def simplePhraseOnOneFile(sampleInput):
 
     finalRes = {}
     end = time.time()
+    
     for i in range(len(result)):
         finalRes[result[i][0]] = {"score":result[i][1],"document":docInfo[str(result[i][0])]}
                         
@@ -126,11 +146,80 @@ def simplePhraseOnAllFiles(sampleInput):
             finalRes[filePrefix + "_" +str(result[res][0])] = {"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
     end = time.time()
-    for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
-        print(json.dumps({top:finalRes[top]}, indent=1))
-        
+    if(finalRes):
+        for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
+            print(json.dumps({top:finalRes[top]}, indent=1))
+    else:
+        print({})
+            
     print(f"operation took: {end - start}")
 
+
+def simpleWildCardonOneFile(sampleInput):
+    fileName = sampleInput["query"]["fileName"]
+    topK = sampleInput["query"]["top"] if "top" in sampleInput["query"] else 5
+    query = sampleInput["query"]["wildcard"]
+
+    bigramIndex = openBigram(fileName)
+    docInfo , invertedIndex = openOnePair(fileName)
+
+    start = time.time()
+
+    result = wildCardQuery(query, invertedIndex ,bigramIndex, topK)
+
+    finalRes = {}
+    
+    end = time.time()
+
+    if(result):
+        for i in range(len(result)):
+            finalRes[result[i][0]] = {"score":result[i][1],"document":docInfo[str(result[i][0])]}
+    else:
+        print("{}")
+        
+    print(json.dumps(finalRes,indent=1))
+    print(f"operation took: {end - start}")
+
+def simpleWildCardonAllFiles(sampleInput):
+    topK = sampleInput["query"]["top"] if "top" in sampleInput["query"] else 5
+    query = sampleInput["query"]["wildcard"]
+    allIndexes = os.listdir("../indexes/")
+    allDocumentsInfo = os.listdir("../documentInfo")
+    allBigramIndexes = os.listdir("../bigramIndex")
+    jsonPrefix = "../documentInfo/"
+    picklePrefix = "../indexes/"
+    bigramPrefix =  "../bigramIndex/"
+    finalRes = {}
+
+    start = time.time()
+    
+    for i in range(417):
+
+        filePrefix = allDocumentsInfo[i][:-5]
+        with open(jsonPrefix+filePrefix+".json", 'r') as f:
+            docInfo = json.load(f)
+
+
+        with open(picklePrefix+filePrefix+".pickle", 'rb') as file:
+            invertedIndex = pickle.load(file)
+
+        with open(bigramPrefix+filePrefix+".pickle", 'rb') as file:
+            bigramIndex = pickle.load(file)
+
+
+        result = wildCardQuery(query, invertedIndex ,bigramIndex, topK)
+    
+        for res in range(len(result)):
+            finalRes[filePrefix + "_" +str(result[res][0])] = {"score":result[res][1],"document":docInfo[str(result[res][0])]}
+
+
+    end = time.time()
+    if(finalRes):
+        for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
+            print(json.dumps({top:finalRes[top]}, indent=1))
+    else:
+        print({})
+    print(f"operation took: {end - start}")
 
 
 if(sampleInput["query"]["mode"]):
@@ -138,8 +227,12 @@ if(sampleInput["query"]["mode"]):
         simpleSearchOnAllFiles(sampleInput)
     elif("must" in sampleInput["query"]):
         simplePhraseOnAllFiles(sampleInput)
+    elif("wildcard" in sampleInput["query"]):
+        simpleWildCardonAllFiles(sampleInput)
 else:
     if("search" in sampleInput["query"]):
         simpleSearchOnOneFile(sampleInput)
     elif("must" in sampleInput["query"]):
         simplePhraseOnOneFile(sampleInput)
+    elif("wildcard" in sampleInput["query"]):
+        simpleWildCardonOneFile(sampleInput)
