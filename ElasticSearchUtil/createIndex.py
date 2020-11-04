@@ -8,6 +8,17 @@ dataDir = "C:\\Users\\Shashank\\Desktop\\Project\\AIR\\TelevisionNews\\"
 files = os.listdir(dataDir)
 
 mappingJson = {
+  "settings": {
+    "number_of_shards": 1,
+    "similarity": {
+      "scripted_tfidf": {
+        "type": "scripted",
+        "script": {
+          "source": "double tf = Math.sqrt(doc.freq); double idf = Math.log((field.docCount+1.0)/(term.docFreq+1.0)) + 1.0; return  tf * idf;"
+        }
+      }
+    }
+  },
   "mappings": {
     "properties": {
       "URL": { "type": "text" },
@@ -16,7 +27,7 @@ mappingJson = {
       "Show":{ "type": "text" },
       "IAShowID": { "type": "text" },
       "IAPreviewThumb":{ "type": "text" },
-      "Snippet":{ "type": "text" }
+      "Snippet":{ "type": "text",  "similarity": "scripted_tfidf" }
     }
   }
 }
@@ -38,6 +49,7 @@ for i in files:
         contentJson["IAShowID"] = csvFile.iloc[doc]["IAShowID"]
         contentJson["IAPreviewThumb"] = csvFile.iloc[doc]["IAPreviewThumb"]
         contentJson["Snippet"] = csvFile.iloc[doc]["Snippet"]
+        # contentJson = csvFile.iloc[doc]
 
         with open('C:\\Users\\Shashank\\Desktop\\Project\\AIR\\InformationRetrieval\\ElasticSearchUtil\\jsonInputs\\'+i[:-4]+".json", 'a') as outfile:
             json.dump(indexJson,outfile)
