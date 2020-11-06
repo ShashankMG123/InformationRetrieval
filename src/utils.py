@@ -3,7 +3,6 @@ import pickle
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
-from sklearn.metrics import confusion_matrix, classification_report
 
 
 def nltk_tag_to_wordnet_tag(nltk_tag):
