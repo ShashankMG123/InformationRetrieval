@@ -4,6 +4,7 @@ from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 
+
 def nltk_tag_to_wordnet_tag(nltk_tag):
     if nltk_tag.startswith('J'):
         return wordnet.ADJ
