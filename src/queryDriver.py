@@ -1,35 +1,41 @@
-from utils import openOnePair, openBigram
+from utils import openOnePair, openBigram, compareOutputs
 from simpleSearch import searchOnlyTerms
 from phraseQuery import searchPhrase
 from wildcardQuery import wildCardQuery
+from compareES import queryES
 import json
 import pickle
 import time
 import os
 
+
+COMPARE_MODE = 1
+
+
 sampleInput = {
                     "query":
                     {
-                        "mode":1,
-                        "fileName" : "BBCNEWS.201701",
-                        "search" : ["gotobibjijfgs"],
-                        "top":3
+                        "mode":0,
+                        "fileName" : "CNN.200909",
+                        "search" : ["chirp","gas"],
+                        "top":10
                     }
                 }
 
 
-"""
-sampleInput = {
-                  "query":
-                    {
-                        "mode":1,
-                        "fileName" : "BBCNEWS.201701",
-                        "wildcard" : "*v*" ,
-                        "top":5
-                    } 
-                }
 
-"""
+
+# sampleInput = {
+#                   "query":
+#                     {
+#                         "mode":0,
+#                         "fileName" : "CNN.200909",
+#                         "wildcard" : "ca*" ,
+#                         "top":10
+#                     } 
+#                 }
+
+
 # search: this is my name 
 """
 sampleInput = {
@@ -59,9 +65,9 @@ def simpleSearchOnOneFile(sampleInput):
     for i in range(len(result)):
         finalRes[result[i][0]] = {"score":result[i][1],"document":docInfo[str(result[i][0])]}
                         
-
-    print(json.dumps(finalRes,indent=1))
-    print(f"operation took: {end - start}")
+    #return(json.dumps(finalRes,indent=1))
+    return(finalRes, (end - start))
+    
 
 
 
@@ -231,8 +237,14 @@ if(sampleInput["query"]["mode"]):
         simpleWildCardonAllFiles(sampleInput)
 else:
     if("search" in sampleInput["query"]):
-        simpleSearchOnOneFile(sampleInput)
+        finalRes, timeTaken = simpleSearchOnOneFile(sampleInput)
+        print(json.dumps(finalRes,indent=1))
+        print("Time taken by IR :", timeTaken)
     elif("must" in sampleInput["query"]):
         simplePhraseOnOneFile(sampleInput)
     elif("wildcard" in sampleInput["query"]):
         simpleWildCardonOneFile(sampleInput)
+
+if(COMPARE_MODE):
+    esOutput = queryES(sampleInput)
+    compareOutputs(finalRes, esOutput)
