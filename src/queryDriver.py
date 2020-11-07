@@ -250,7 +250,7 @@ else:
         simpleWildCardonOneFile(sampleInput)
 
 
-AllDocInfo = os.listdir("..\\documentInfo")
+AllDocInfo = os.listdir("..\\documentInfo\\")
 if(COMPARE_MODE):
     if(sampleInput["query"]["mode"]==0):
         timing,esOutput = queryES(sampleInput)
