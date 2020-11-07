@@ -22,11 +22,10 @@ def queryES(sampleInput):
                     }
                 }
                 }
-
     response = requests.get(f'http://localhost:9200/{sampleInput["query"]["fileName"].lower()}/_search?pretty=true&size={ sampleInput["query"]["top"]}',json = payload)
-    print("Time taken By ES: "+str(response.elapsed.total_seconds()))
-    return(response.text)
+    timing = response.elapsed.total_seconds()
 
+    return(timing,response.text)
 
 # sampleInput = {
 #                     "query":
