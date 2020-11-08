@@ -49,9 +49,9 @@ def openBigram(fileName):
 
 def compareOutputs(finalRes, id):
     esKeys = [int(i) for i in id]
-    # print(finalRes)
     resKeys = list([i in esKeys for i in finalRes.keys()])
-
+    # print(esKeys)
+    # print(resKeys)
     esKeys = [True] * len(esKeys)
 
     TP = 0

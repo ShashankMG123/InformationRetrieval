@@ -65,7 +65,6 @@ def simpleSearchOnOneFile(sampleInput):
     for i in range(len(result)):
         finalRes[result[i][0]] = {"score":result[i][1],"document":docInfo[str(result[i][0])]}
                         
-    #return(json.dumps(finalRes,indent=1))
     return(finalRes, (end - start))
     
 
@@ -105,10 +104,8 @@ def simpleSearchOnAllFiles(sampleInput):
 
     if(finalRes):
         for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
-            # print(json.dumps({top:finalRes[top]},indent=1))
+            print(json.dumps({top:finalRes[top]},indent=1))
             FinalRes[top] = finalRes[top]
-    # else:
-    #     print("{}")
 
     return (FinalRes,(end - start))
 
@@ -275,10 +272,10 @@ if(COMPARE_MODE):
             sampleInput["query"]["fileName"] = filename
             timing,result = queryES(sampleInput)
             res = json.loads(result)
-            res1 = res["hits"]["hits"]
-            score = res["hits"]["max_score"]
-            for i in range(len(res1)):
-                MaxScore[res1[i]["_id"]] = {"score":score,"id":res1[i]["_id"]}
+            res = res["hits"]["hits"]
+            for i in range(len(res)):
+                score = res[i]["_score"]
+                MaxScore[res[i]["_id"]] = {"score":score}
             times.append(timing)
         if(MaxScore):
             for top in sorted(MaxScore, key=lambda x: MaxScore[x]["score"], reverse=1)[:topK]:
