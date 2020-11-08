@@ -60,13 +60,13 @@ def searchOnlyTerms(searchTerms, invertedIndex, topK, N):
     #N = 279 #change based on len
     # iterating through all of the query terms
     for term in searchTerms:
-        if(term in invertedIndex):
-            IDF = math.log(N/invertedIndex[term][0] ,10)
+        if(invertedIndex.has_key(term)):
+            IDF = math.log(N/invertedIndex.get(term)[0] ,10)
             for docIDforTerm in invertedIndex[term][1]:
                 if(docIDforTerm in rankDict):
-                    rankDict[docIDforTerm] += invertedIndex[term][1][docIDforTerm][0] * IDF
+                    rankDict[docIDforTerm] += invertedIndex.get(term)[1][docIDforTerm][0] * IDF
                 else:
-                    rankDict[docIDforTerm] = invertedIndex[term][1][docIDforTerm][0] * IDF
+                    rankDict[docIDforTerm] = invertedIndex.get(term)[1][docIDforTerm][0] * IDF
         else:
             pass
     

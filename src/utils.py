@@ -41,3 +41,50 @@ def openOnePair(fileName):
     
     return [docInfo , invertedIndex]
 
+
+def openBigram(fileName):
+    with open(f"../bigramIndex/{fileName}.pickle", 'rb') as file:
+        bigramIndex = pickle.load(file)
+    return bigramIndex
+
+def compareOutputs(finalRes, esOutput):
+    esOutput = json.loads(esOutput)
+    
+    esKeys = [int(i["_id"]) for i in esOutput["hits"]["hits"]]
+    resKeys = list([i in esKeys for i in finalRes.keys()])
+
+    esKeys = [True] * len(esKeys)
+
+    TP = 0
+    FP = 0
+    TN = 0
+    FN = 0
+
+    for i in range(len(resKeys)):
+        if(resKeys[i] == esKeys[i]):
+            if(resKeys[i]):
+                TP += 1
+            else:
+                TN += 1
+        else:
+            if(resKeys[i]):
+                FP += 1
+            else:
+                FN += 1
+
+
+    print("----------CONFUSION MATRIX------------")
+    print([TP,FP])
+    print([FN,TN])
+    print("-----------------METRICS-----------------")
+    acc = (TP+TN)/(TP+TN+FP+FN)
+    prec = (TP)/(TP+FP)
+    recall = (TP)/(TP+FN)
+    f1score = (2*prec*recall) / (prec+recall)
+
+    print("Accuracy :", acc)
+    print("Precision :", prec)
+    print("Recall :", recall)
+    print("FScore :", f1score)
+
+    
