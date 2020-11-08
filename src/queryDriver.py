@@ -37,17 +37,17 @@ sampleInput = {
 
 
 # search: this is my name 
-"""
-sampleInput = {
-                  "query":
-                    {
-                        "mode":0,
-                        "fileName" : "BBCNEWS.201701",
-                        "must" : "naskjfdbaofbaisobf" ,
-                        "top":8
-                    } 
-                }
-"""
+
+# sampleInput = {
+#                   "query":
+#                     {
+#                         "mode":0,
+#                         "fileName" : "BBCNEWS.201701",
+#                         "must" : "naskjfdbaofbaisobf" ,
+#                         "top":8
+#                     } 
+#                 }
+
 def simpleSearchOnOneFile(sampleInput):
 
     fileName = sampleInput["query"]["fileName"]
@@ -95,18 +95,22 @@ def simpleSearchOnAllFiles(sampleInput):
             invertedIndex = pickle.load(file)
 
         result = searchOnlyTerms(searchTerms, invertedIndex, topK , max([int(x) for x in docInfo]))
-
+        # print(result)
         for res in range(len(result)):
-            finalRes[filePrefix + "_" +str(result[res][0])] = {"score":result[res][1],"document":docInfo[str(result[res][0])]}
+            finalRes[result[res][0]] = {"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
     end = time.time()
-    # if(finalRes):
-    #     for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
-    #         print(json.dumps({top:finalRes[top]}, indent=1))
+
+    FinalRes = dict()
+
+    if(finalRes):
+        for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
+            # print(json.dumps({top:finalRes[top]},indent=1))
+            FinalRes[top] = finalRes[top]
     # else:
     #     print("{}")
 
-    return (finalRes,(end - start))
+    return (FinalRes,(end - start))
 
 def simplePhraseOnOneFile(sampleInput):
     fileName = sampleInput["query"]["fileName"]
@@ -216,7 +220,7 @@ def simpleWildCardonAllFiles(sampleInput):
 
 
         result = wildCardQuery(query, invertedIndex ,bigramIndex, topK)
-    
+
         for res in range(len(result)):
             finalRes[filePrefix + "_" +str(result[res][0])] = {"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
@@ -233,7 +237,7 @@ def simpleWildCardonAllFiles(sampleInput):
 if(sampleInput["query"]["mode"]):
     if("search" in sampleInput["query"]):
         AllfinalRes, timeTaken = simpleSearchOnAllFiles(sampleInput)
-        # print(json.dumps(finalRes2,indent=1))
+        # print(json.dumps(AllfinalRes,indent=1))
         print("\nTime taken by IR :", timeTaken)
     elif("must" in sampleInput["query"]):
         simplePhraseOnAllFiles(sampleInput)
@@ -242,7 +246,7 @@ if(sampleInput["query"]["mode"]):
 else:
     if("search" in sampleInput["query"]):
         OnefinalRes, timeTaken = simpleSearchOnOneFile(sampleInput)
-        # print(json.dumps(finalRes,indent=1))
+        # print(json.dumps(OnefinalRes,indent=1))
         print("\nTime taken by IR :", timeTaken)
     elif("must" in sampleInput["query"]):
         simplePhraseOnOneFile(sampleInput)
@@ -250,23 +254,36 @@ else:
         simpleWildCardonOneFile(sampleInput)
 
 
-AllDocInfo = os.listdir("G:\\PES-UNIVERSITY\\AIR\\AIR-Project\\compareESWithIR\\documentInfo")
+AllDocInfo = os.listdir("..\\documentInfo\\")
 if(COMPARE_MODE):
     if(sampleInput["query"]["mode"]==0):
         timing,esOutput = queryES(sampleInput)
+        res = json.loads(esOutput)
+        res = res["hits"]["hits"]
+        id = []
+        for i in range(len(res)):
+            id.append(res[i]["_id"])
         print("Time taken By ES: "+str(timing))
-        compareOutputs(OnefinalRes, esOutput)
+        compareOutputs(OnefinalRes, id)
     else:
-        if(sampleInput["query"]["mode"]==1):
-            esOutput = ""
-            times = []
-            for i in range(417):
-                filename = str(AllDocInfo[i][:-5])
-                sampleInput["query"]["fileName"] = filename
-                timing,result = queryES(sampleInput)
-                times.append(timing)
-                esOutput = esOutput + result
-            # print(esOutput)
-            print("Time taken By ES: "+str(sum(times)))
-            compareOutputs(AllfinalRes,esOutput)
+        times = []
+        MaxScore = dict()
+        final = dict()
+        topK = sampleInput["query"]["top"]
+        for i in range(417):
+            filename = str(AllDocInfo[i][:-5])
+            sampleInput["query"]["fileName"] = filename
+            timing,result = queryES(sampleInput)
+            res = json.loads(result)
+            res1 = res["hits"]["hits"]
+            score = res["hits"]["max_score"]
+            for i in range(len(res1)):
+                MaxScore[res1[i]["_id"]] = {"score":score,"id":res1[i]["_id"]}
+            times.append(timing)
+        if(MaxScore):
+            for top in sorted(MaxScore, key=lambda x: MaxScore[x]["score"], reverse=1)[:topK]:
+                final[top] = MaxScore[top]
+        id = final.keys()
+        print("Time taken By ES: "+str(sum(times)))
+        compareOutputs(AllfinalRes,id)
 
