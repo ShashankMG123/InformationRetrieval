@@ -24,7 +24,6 @@ from functools import reduce
 # ]
 # docsToconsider = (1,)
 
-[ [ [54],[]] , []]
 def postFilter(docsToConsider, allDocList):
     docsToConsider = list(docsToConsider)
     
