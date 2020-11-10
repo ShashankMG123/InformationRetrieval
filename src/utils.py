@@ -47,12 +47,11 @@ def openBigram(fileName):
         bigramIndex = pickle.load(file)
     return bigramIndex
 
-def compareOutputs(finalRes, esOutput):
-    esOutput = json.loads(esOutput)
-    
-    esKeys = [int(i["_id"]) for i in esOutput["hits"]["hits"]]
+def compareOutputs(finalRes, id):
+    esKeys = [int(i) for i in id]
     resKeys = list([i in esKeys for i in finalRes.keys()])
-
+    # print(esKeys)
+    # print(resKeys)
     esKeys = [True] * len(esKeys)
 
     TP = 0
@@ -78,9 +77,25 @@ def compareOutputs(finalRes, esOutput):
     print([FN,TN])
     print("-----------------METRICS-----------------")
     acc = (TP+TN)/(TP+TN+FP+FN)
-    prec = (TP)/(TP+FP)
-    recall = (TP)/(TP+FN)
-    f1score = (2*prec*recall) / (prec+recall)
+
+    # handling a border case which has zero TP and FP
+    # which if not handled gives a zero division error. 
+    if not TP and not FP:
+        prec = 0
+    else:
+        prec = (TP)/(TP+FP)
+    
+    # similar to precision, recall division error is handled below.
+    if not TP and not FN:
+        recall = 0
+    else:
+        recall = (TP)/(TP+FN)
+
+    # if both precision and recall is zero, f1-score is set to zero.
+    if not prec and not recall:
+        f1score = 0
+    else:
+        f1score = (2*prec*recall) / (prec+recall)
 
     print("Accuracy :", acc)
     print("Precision :", prec)
