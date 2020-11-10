@@ -17,8 +17,8 @@ sampleInput = {
                     {
                         "mode":1,
                         "fileName" : "CNN.200909",
-                        "search" : ["chirp","gas"],
-                        "top":20
+                        "search" : ["greenhouse","gas"],
+                        "top":15
                     }
                 }
 
@@ -119,7 +119,7 @@ def simpleSearchOnAllFiles(sampleInput):
     # of all docs retrieved from each file
     if(finalRes):
         for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
-            print(json.dumps({top:finalRes[top]},indent=1))
+            # print(json.dumps({top:finalRes[top]},indent=1))
             FinalRes[top] = finalRes[top]
 
     return (FinalRes,(end - start))
@@ -280,7 +280,7 @@ def simpleWildCardonAllFiles(sampleInput):
 if(sampleInput["query"]["mode"]):
     if("search" in sampleInput["query"]):
         AllfinalRes, timeTaken = simpleSearchOnAllFiles(sampleInput)
-        print(json.dumps(AllfinalRes,indent=1))
+        # print(json.dumps(AllfinalRes,indent=1))
         print("\nTime taken by IR :", timeTaken)
     elif("must" in sampleInput["query"]):
         simplePhraseOnAllFiles(sampleInput)
