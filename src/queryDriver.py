@@ -9,13 +9,13 @@ import time
 import os
 
 
-COMPARE_MODE = 1
+COMPARE_MODE = 0
 
 
 sampleInput = {
                     "query":
                     {
-                        "mode":1,
+                        "mode":0,
                         "fileName" : "CNN.200909",
                         "search" : ["greenhouse","gas"],
                         "top":15
@@ -280,7 +280,7 @@ def simpleWildCardonAllFiles(sampleInput):
 if(sampleInput["query"]["mode"]):
     if("search" in sampleInput["query"]):
         AllfinalRes, timeTaken = simpleSearchOnAllFiles(sampleInput)
-        # print(json.dumps(AllfinalRes,indent=1))
+        print(json.dumps(AllfinalRes,indent=1))
         print("\nTime taken by IR :", timeTaken)
     elif("must" in sampleInput["query"]):
         simplePhraseOnAllFiles(sampleInput)
@@ -289,7 +289,7 @@ if(sampleInput["query"]["mode"]):
 else:
     if("search" in sampleInput["query"]):
         OnefinalRes, timeTaken = simpleSearchOnOneFile(sampleInput)
-        # print(json.dumps(OnefinalRes,indent=1))
+        print(json.dumps(OnefinalRes,indent=1))
         print("\nTime taken by IR :", timeTaken)
     elif("must" in sampleInput["query"]):
         simplePhraseOnOneFile(sampleInput)
