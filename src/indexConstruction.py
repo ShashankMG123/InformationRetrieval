@@ -35,27 +35,29 @@ def createDictionaryFromRow(row, headers):
 
 def createIndex(csvFileName):
 # iterate through all of the snippets in the dataset
+    # Creating a BTree structure to hold the inverted index
     invertedIndex = OOBTree()
+    # a dictionary to hold the document information
     docInfo = dict()
     csvFile = read_csv(f"..\..\TelevisionNews\{csvFileName}")
     for docId in range(len(csvFile)):
-        #Json file for each doc { docID : { URL : "" , Snippet :""}}
+        # Json file for each doc { docID : { URL : " " , Snippet :"",....}}
         docInfo[docId] = createDictionaryFromRow(csvFile.iloc[docId], csvFile.columns)
+       
         # tokenize the snippet to get all the words (using nltk word_tokenize function to do the same)
-        #listOfWords = word_tokenize(csvFile['Snippet'][docId].lower())
-
+        # listOfWords = word_tokenize(csvFile['Snippet'][docId].lower())
         listOfWords = [x for x in word_tokenize(csvFile['Snippet'][docId].lower()) if x.isalnum()]
         listOfWords = lemmatize_sentence(listOfWords)
 
         for pos in range(len(listOfWords)):
             lemWord = listOfWords[pos]
-            #lemWord = lemmatizer.lemmatize(words)
-            #remove unwanted characters such -
+            # lemWord = lemmatizer.lemmatize(words)
+            # remove unwanted characters such -
 
             if(lemWord.isalnum()): 
-                #if the word already exists in btree
+                # if the word already exists in BTree
                 if(invertedIndex.has_key(lemWord)):
-                    #avoid repition of docIDs
+                    # avoid repeatition of docIDs
                     if(docId not in invertedIndex[lemWord][1]):
                         invertedIndex[lemWord][1][docId] = [1,[pos]]
                         invertedIndex[lemWord][0] += 1                    
@@ -65,8 +67,23 @@ def createIndex(csvFileName):
                 else:
                     postingListElement = [1, {docId : [ 1, [pos]]}]
                     invertedIndex.insert(lemWord, postingListElement)
-        
-    # zero based postioning of words after removing non alpha numeric characters
+
+    # writing the inverted index into pickele file
+    # one pickle file for each csv
+    with open(f'..\indexes\{csvFileName[:-4]}.pickle', 'wb') as handle:
+        pickle.dump(invertedIndex, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    # dumping the docInfo of each csv file into a json file
+    with open(f'..\documentInfo\{csvFileName[:-4]}.json', 'w') as f:
+        dump(docInfo, f)
+
+# reading all the csv files one by one 
+# and calling the create index function
+all_filenames = os.listdir("..\..\TelevisionNews\\")
+for i in range(len(all_filenames)):
+    createIndex(all_filenames[i])
+
+
+# zero based postioning of words after removing non alpha numeric characters
     # {
     #   "the": 
     #        [
@@ -77,19 +94,8 @@ def createIndex(csvFileName):
     #       ]
     # }
 
-    """
-        {
-            "the":
-                123,
-                object of linked list ------------> (1,4)->(2,4)
-        }
-    """
-    with open(f'..\indexes\{csvFileName[:-4]}.pickle', 'wb') as handle:
-        pickle.dump(invertedIndex, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    with open(f'..\documentInfo\{csvFileName[:-4]}.json', 'w') as f:
-        dump(docInfo, f)
-
-all_filenames = os.listdir("..\..\TelevisionNews\\")
-for i in range(len(all_filenames)):
-    createIndex(all_filenames[i])
+    #     {
+    #         "the":
+    #             123,
+    #             object of linked list ------------> (1,4)->(2,4)
+    #     }

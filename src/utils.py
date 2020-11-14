@@ -47,12 +47,11 @@ def openBigram(fileName):
         bigramIndex = pickle.load(file)
     return bigramIndex
 
-def compareOutputs(finalRes, esOutput):
-    esOutput = json.loads(esOutput)
-    
-    esKeys = [int(i["_id"]) for i in esOutput["hits"]["hits"]]
+def compareOutputs(finalRes, id):
+    esKeys = [int(i) for i in id]
     resKeys = list([i in esKeys for i in finalRes.keys()])
-
+    # print(esKeys)
+    # print(resKeys)
     esKeys = [True] * len(esKeys)
 
     TP = 0
