@@ -28,14 +28,6 @@ def postFilter(docsToConsider, allDocList):
     docsToConsider = list(docsToConsider)
     
     positions = []
-    """
-    positions = []
-    for ithWord in range(len(allDocList)):
-        positions.append(dict())
-        for doc in docsToConsider:
-            positions[ithWord][doc]=allDocList[ithWord][1][doc][1]
-    print(positions)
-    """
     for doc in range(len(docsToConsider)):
         positions.append({})
         for ithWord in range(len(allDocList)):
