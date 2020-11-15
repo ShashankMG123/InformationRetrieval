@@ -15,7 +15,7 @@ COMPARE_MODE = 0
 sampleInput = {
                     "query":
                     {
-                        "mode":0,
+                        "mode":1,
                         "fileName" : "CNN.200909",
                         "search" : ["greenhouse","gas"],
                         "top":15
@@ -84,7 +84,6 @@ def simpleSearchOnAllFiles(sampleInput):
 
     topK = sampleInput["query"]["top"] if "top" in sampleInput["query"] else 5
     searchTerms = [searchTerm.lower() for searchTerm in sampleInput["query"]["search"]]
-    allIndexes = os.listdir("..\\indexes\\")
     allDocumentsInfo = os.listdir("..\\documentInfo\\")
     jsonPrefix = "..\\documentInfo\\"
     picklePrefix = "..\\indexes\\"
@@ -119,7 +118,6 @@ def simpleSearchOnAllFiles(sampleInput):
     # of all docs retrieved from each file
     if(finalRes):
         for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
-            # print(json.dumps({top:finalRes[top]},indent=1))
             FinalRes[top] = finalRes[top]
 
     return (FinalRes,(end - start))
@@ -159,7 +157,6 @@ it in all files
 def simplePhraseOnAllFiles(sampleInput):
     topK = sampleInput["query"]["top"] if "top" in sampleInput["query"] else 5
     searchTerms = sampleInput["query"]["must"]
-    allIndexes = os.listdir("..\\indexes\\")
     allDocumentsInfo = os.listdir("..\\documentInfo\\")
     jsonPrefix = "..\\documentInfo\\"
     picklePrefix = "..\\indexes\\"
@@ -234,11 +231,9 @@ input is the wildcard query
 def simpleWildCardonAllFiles(sampleInput):
     topK = sampleInput["query"]["top"] if "top" in sampleInput["query"] else 5
     query = sampleInput["query"]["wildcard"]
-    allIndexes = os.listdir("..\\indexes\\")
     allDocumentsInfo = os.listdir("..\\documentInfo\\")
     jsonPrefix = "..\\documentInfo\\"
     picklePrefix = "..\\indexes\\"
-    allBigramIndexes = os.listdir("..\\bigramIndex\\")
     bigramPrefix =  "..\\bigramIndex\\"
     finalRes = {}
 
@@ -289,7 +284,7 @@ if(sampleInput["query"]["mode"]):
 else:
     if("search" in sampleInput["query"]):
         OnefinalRes, timeTaken = simpleSearchOnOneFile(sampleInput)
-        print(json.dumps(OnefinalRes,indent=1))
+        # print(json.dumps(OnefinalRes,indent=1))
         print("\nTime taken by IR :", timeTaken)
     elif("must" in sampleInput["query"]):
         simplePhraseOnOneFile(sampleInput)
@@ -315,7 +310,6 @@ if(COMPARE_MODE):
     else:
         times = []
         MaxScore = dict()
-        final = dict()
         topK = sampleInput["query"]["top"]
         for i in range(417):
             filename = str(AllDocInfo[i][:-5])
@@ -325,13 +319,12 @@ if(COMPARE_MODE):
             res = json.loads(result)
             res = res["hits"]["hits"]
             for i in range(len(res)):
-                score = res[i]["_score"]
-                MaxScore[res[i]["_id"]] = {"score":score}
+                MaxScore[res[i]["_id"]] = res[i]["_score"]
             times.append(timing)
+        id = []
         if(MaxScore):
-            for top in sorted(MaxScore, key=lambda x: MaxScore[x]["score"], reverse=1)[:topK]:
-                final[top] = MaxScore[top]
-        id = final.keys()
+            id = sorted(MaxScore, key=lambda x: MaxScore[x], reverse=1)[:topK]
+        print(id, [MaxScore[i] for i in id], AllfinalRes.keys(), [])
         print("Time taken By ES: "+str(sum(times)))
         # comparing the 2 results and printing the confusion matrix
         # other metrics
