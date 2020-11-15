@@ -53,13 +53,10 @@ def intersectionBiGrams(possibleWords):
     possibleWords = sorted(possibleWords, key= lambda x:len(x))
     return(list(reduce(lambda x,y: set(x) & set(y), possibleWords)))
 
-
-
 def postFilter(regex, listOfCandi):
     # performing regex match
     regex = regex.replace("*", ".*")
     return list(filter(lambda x : re.search(regex, x), listOfCandi))
-
 
 def wordRetrieval(query, bigramIndex):
     # generating bigrams for the query given as input
