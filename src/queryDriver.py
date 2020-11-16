@@ -61,7 +61,8 @@ def simpleSearchOnAllFiles(sampleInput):
     picklePrefix = "..\\indexes\\"
     finalRes = {}
 
-    start = time.time()
+    totalTime = 0
+
     # reading each file one by one
     for i in range(417):
 
@@ -76,13 +77,15 @@ def simpleSearchOnAllFiles(sampleInput):
 
         # calling the search function
         # takes query terms, inverted index, K value as input
+        start = time.time()
         result = searchOnlyTerms(searchTerms, invertedIndex, topK , max([int(x) for x in docInfo]))
+        end = time.time()
 
         # returns top K docs from each file
         for res in range(len(result)):
             finalRes[result[res][0]] = {"docName":filePrefix + "_" +str(result[res][0]) ,"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
-    end = time.time()
+        totalTime += end - start
 
     FinalRes = dict()
     # we need overall top K docs
@@ -92,7 +95,7 @@ def simpleSearchOnAllFiles(sampleInput):
         for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
             FinalRes[top] = finalRes[top]
 
-    return (FinalRes,(end - start))
+    return (FinalRes, totalTime)
 
 """
 This function is for performing phrase search on one file
@@ -244,7 +247,7 @@ if(sampleInput["query"]["mode"]):
     if("search" in sampleInput["query"]):
         AllfinalRes, timeTaken = simpleSearchOnAllFiles(sampleInput)
         print("\nTime taken by IR :", timeTaken)
-        print(json.dumps(AllfinalRes,indent=1))
+        # print(json.dumps(AllfinalRes,indent=1))
     elif("must" in sampleInput["query"]):
         simplePhraseOnAllFiles(sampleInput)
     elif("wildcard" in sampleInput["query"]):
