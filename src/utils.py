@@ -48,33 +48,19 @@ def openBigram(fileName):
     return bigramIndex
 
 def compareOutputs(finalRes, id):
-    esKeys = [int(i) for i in id]
-    resKeys = list([i in esKeys for i in finalRes.keys()])
+    esKeys = set([int(i) for i in id])
+    resKeys = set(finalRes.keys())
     # print(esKeys)
     # print(resKeys)
-    esKeys = [True] * len(esKeys)
 
-    TP = 0
-    FP = 0
+    TP = len(esKeys.intersection(resKeys))
+    FP = len(resKeys.difference(esKeys))
     TN = 0
-    FN = 0
-
-    for i in range(len(resKeys)):
-        if(resKeys[i] == esKeys[i]):
-            if(resKeys[i]):
-                TP += 1
-            else:
-                TN += 1
-        else:
-            if(resKeys[i]):
-                FP += 1
-            else:
-                FN += 1
-
+    FN = len(esKeys.difference(resKeys))
 
     print("----------CONFUSION MATRIX------------")
     print([TP,FP])
-    print([FN,TN])
+    print(f"[{FN}, X]")
     print("-----------------METRICS-----------------")
     acc = (TP+TN)/(TP+TN+FP+FN)
 
