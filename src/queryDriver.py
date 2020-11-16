@@ -137,7 +137,8 @@ def simplePhraseOnAllFiles(sampleInput):
     picklePrefix = "..\\indexes\\"
     finalRes = {}
 
-    start = time.time()
+    totalTime = 0
+    
     # reading each file one by one
     for i in range(417):
 
@@ -151,14 +152,17 @@ def simplePhraseOnAllFiles(sampleInput):
 
         # calling the search function
         # input parameters are the phrase, inverted index, K value
+        start = time.time()
         result = searchPhrase(searchTerms, invertedIndex, topK)
+        end = time.time()
 
         # retrieves top K from each file
         for res in range(len(result)):
             finalRes[result[res][0]] = {"docName":filePrefix + "_" +str(result[res][0]),"score":result[res][1],"document":docInfo[str(result[res][0])]}
+        
+        totalTime += end - start
 
-    end = time.time()
-    print(f"operation took: {end - start}")
+    print(f"operation took: {totalTime}")
     # selecting the overall top K docs 
     if(finalRes):
         for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
@@ -210,7 +214,8 @@ def simpleWildCardonAllFiles(sampleInput):
     bigramPrefix =  "..\\bigramIndex\\"
     finalRes = {}
 
-    start = time.time()
+    totalTime = 0
+
     # reading each file one by one
     for i in range(417):
 
@@ -227,13 +232,16 @@ def simpleWildCardonAllFiles(sampleInput):
 
         # calling the search function
         # inputs are query, inverted index, bigram index, K value
+        start = time.time()
         result = wildCardQuery(query, invertedIndex ,bigramIndex, topK)
+        end = time.time()
         # it retrieves top K from each file
         for res in range(len(result)):
             finalRes[result[res][0]] = {"docName":filePrefix + "_" +str(result[res][0]),"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
-    end = time.time()
-    print(f"operation took: {end - start}")
+        totalTime += end - start
+
+    print(f"operation took: {totalTime}")
     # selecting the overall top K from all the files considered
     if(finalRes):
         for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
