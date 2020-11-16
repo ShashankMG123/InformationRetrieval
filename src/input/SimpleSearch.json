@@ -1,0 +1,9 @@
+{
+    "query":
+    {
+        "mode":1,
+        "fileName" : "CNN.200909",
+        "search" : ["greenhouse","gas"],
+        "top":10
+    }
+}

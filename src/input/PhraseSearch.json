@@ -1,0 +1,9 @@
+{
+    "query":
+    {
+        "mode":1,
+        "fileName" : "BBCNEWS.201701",
+        "must" : "I do believe in climate change " ,
+        "top":5
+    } 
+}
