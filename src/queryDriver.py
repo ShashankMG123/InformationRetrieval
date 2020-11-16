@@ -12,26 +12,27 @@ import os
 COMPARE_MODE = 0
 
 
-sampleInput = {
-                    "query":
-                    {
-                        "mode":1,
-                        "fileName" : "CNN.200909",
-                        "search" : ["greenhouse","gas"],
-                        "top":15
-                    }
-                }
-
 
 # sampleInput = {
-#                   "query":
+#                     "query":
 #                     {
 #                         "mode":1,
 #                         "fileName" : "CNN.200909",
-#                         "wildcard" : "ch*" ,
-#                         "top":10
-#                     } 
+#                         "search" : ["greenhouse","gas"],
+#                         "top":15
+#                     }
 #                 }
+
+
+sampleInput = {
+                  "query":
+                    {
+                        "mode":1,
+                        "fileName" : "CNN.200909",
+                        "wildcard" : "ch*" ,
+                        "top":5
+                    } 
+                }
 
 
 # search: this is my name 
@@ -41,8 +42,8 @@ sampleInput = {
 #                     {
 #                         "mode":1,
 #                         "fileName" : "BBCNEWS.201701",
-#                         "must" : "it is" ,
-#                         "top":3
+#                         "must" : "el nino " ,
+#                         "top":5
 #                     } 
 #                 }
 
@@ -180,7 +181,7 @@ def simplePhraseOnAllFiles(sampleInput):
 
         # retrieves top K from each file
         for res in range(len(result)):
-            finalRes[result[i][0]] = {"docName":filePrefix + "_" +str(result[res][0]),"score":result[res][1],"document":docInfo[str(result[res][0])]}
+            finalRes[result[res][0]] = {"docName":filePrefix + "_" +str(result[res][0]),"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
     end = time.time()
     
@@ -255,10 +256,9 @@ def simpleWildCardonAllFiles(sampleInput):
         # calling the search function
         # inputs are query, inverted index, bigram index, K value
         result = wildCardQuery(query, invertedIndex ,bigramIndex, topK)
-
         # it retrieves top K from each file
         for res in range(len(result)):
-            finalRes[result[i][0]] = {"docName":filePrefix + "_" +str(result[res][0]),"score":result[res][1],"document":docInfo[str(result[res][0])]}
+            finalRes[result[res][0]] = {"docName":filePrefix + "_" +str(result[res][0]),"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
     end = time.time()
 
@@ -275,7 +275,7 @@ def simpleWildCardonAllFiles(sampleInput):
 if(sampleInput["query"]["mode"]):
     if("search" in sampleInput["query"]):
         AllfinalRes, timeTaken = simpleSearchOnAllFiles(sampleInput)
-        print(json.dumps(AllfinalRes,indent=1))
+        # print(json.dumps(AllfinalRes,indent=1))
         print("\nTime taken by IR :", timeTaken)
     elif("must" in sampleInput["query"]):
         simplePhraseOnAllFiles(sampleInput)
@@ -309,7 +309,9 @@ if(COMPARE_MODE):
         compareOutputs(OnefinalRes, id)
     else:
         times = []
-        MaxScore = dict()
+        MaxScoreOverall = dict()
+        final = dict()
+
         topK = sampleInput["query"]["top"]
         for i in range(417):
             filename = str(AllDocInfo[i][:-5])
@@ -318,13 +320,19 @@ if(COMPARE_MODE):
             timing,result = queryES(sampleInput)
             res = json.loads(result)
             res = res["hits"]["hits"]
+            MaxScorePerFile = dict()
             for i in range(len(res)):
-                MaxScore[res[i]["_id"]] = res[i]["_score"]
+                score = res[i]["_score"]
+                MaxScorePerFile[res[i]["_id"]] = {"score":score}
+            if(MaxScorePerFile):
+                for top in sorted(MaxScorePerFile, key=lambda x: MaxScorePerFile[x]["score"], reverse=1)[:topK]:
+                    MaxScoreOverall[top] = MaxScorePerFile[top]
             times.append(timing)
-        id = []
-        if(MaxScore):
-            id = sorted(MaxScore, key=lambda x: MaxScore[x], reverse=1)[:topK]
-        print(id, [MaxScore[i] for i in id], AllfinalRes.keys(), [])
+        if(MaxScoreOverall):
+            for top in sorted(MaxScoreOverall, key=lambda x: MaxScoreOverall[x]["score"], reverse=1)[:topK]:
+                final[top] = MaxScoreOverall[top]
+        id = final.keys()
+
         print("Time taken By ES: "+str(sum(times)))
         # comparing the 2 results and printing the confusion matrix
         # other metrics
