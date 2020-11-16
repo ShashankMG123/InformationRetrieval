@@ -7,45 +7,16 @@ import json
 import pickle
 import time
 import os
+import sys
 
 
-COMPARE_MODE = 0
+COMPARE_MODE = int(sys.argv[2])
+  
+InputFileName = sys.argv[1]
 
 
-
-# sampleInput = {
-#                     "query":
-#                     {
-#                         "mode":1,
-#                         "fileName" : "CNN.200909",
-#                         "search" : ["greenhouse","gas"],
-#                         "top":15
-#                     }
-#                 }
-
-
-sampleInput = {
-                  "query":
-                    {
-                        "mode":1,
-                        "fileName" : "CNN.200909",
-                        "wildcard" : "ch*" ,
-                        "top":5
-                    } 
-                }
-
-
-# search: this is my name 
-
-# sampleInput = {
-#                   "query":
-#                     {
-#                         "mode":1,
-#                         "fileName" : "BBCNEWS.201701",
-#                         "must" : "el nino " ,
-#                         "top":5
-#                     } 
-#                 }
+with open(f'input\\{InputFileName}.json', 'r') as handle:
+    sampleInput = json.load(handle)
 
 """
 This function is for performing simple word based search
@@ -184,7 +155,7 @@ def simplePhraseOnAllFiles(sampleInput):
             finalRes[result[res][0]] = {"docName":filePrefix + "_" +str(result[res][0]),"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
     end = time.time()
-    
+    print(f"operation took: {end - start}")
     # selecting the overall top K docs 
     if(finalRes):
         for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
@@ -192,7 +163,6 @@ def simplePhraseOnAllFiles(sampleInput):
     else:
         print({})
             
-    print(f"operation took: {end - start}")
 
 """
 This function is for performing wildcard query search
@@ -213,7 +183,7 @@ def simpleWildCardonOneFile(sampleInput):
     result = wildCardQuery(query, invertedIndex ,bigramIndex, topK)
     
     end = time.time()
-    
+    print(f"operation took: {end - start}")
     finalRes = {}
     if(result):
         for i in range(len(result)):
@@ -222,7 +192,6 @@ def simpleWildCardonOneFile(sampleInput):
         print("{}")
         
     print(json.dumps(finalRes,indent=1))
-    print(f"operation took: {end - start}")
 
 """
 This function is for performing wildcard query
@@ -261,22 +230,21 @@ def simpleWildCardonAllFiles(sampleInput):
             finalRes[result[res][0]] = {"docName":filePrefix + "_" +str(result[res][0]),"score":result[res][1],"document":docInfo[str(result[res][0])]}
 
     end = time.time()
-
+    print(f"operation took: {end - start}")
     # selecting the overall top K from all the files considered
     if(finalRes):
         for top in sorted(finalRes, key=lambda x: finalRes[x]["score"], reverse=1)[:topK]:
             print(json.dumps({top:finalRes[top]}, indent=1))
     else:
         print({})
-    print(f"operation took: {end - start}")
 
 # calling respective search functions 
 # based on the input json fields
 if(sampleInput["query"]["mode"]):
     if("search" in sampleInput["query"]):
         AllfinalRes, timeTaken = simpleSearchOnAllFiles(sampleInput)
-        # print(json.dumps(AllfinalRes,indent=1))
         print("\nTime taken by IR :", timeTaken)
+        print(json.dumps(AllfinalRes,indent=1))
     elif("must" in sampleInput["query"]):
         simplePhraseOnAllFiles(sampleInput)
     elif("wildcard" in sampleInput["query"]):
@@ -284,8 +252,8 @@ if(sampleInput["query"]["mode"]):
 else:
     if("search" in sampleInput["query"]):
         OnefinalRes, timeTaken = simpleSearchOnOneFile(sampleInput)
-        # print(json.dumps(OnefinalRes,indent=1))
         print("\nTime taken by IR :", timeTaken)
+        # print(json.dumps(OnefinalRes,indent=1))
     elif("must" in sampleInput["query"]):
         simplePhraseOnOneFile(sampleInput)
     elif("wildcard" in sampleInput["query"]):
