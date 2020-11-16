@@ -5,10 +5,10 @@ from BTrees.OOBTree import OOBTree
 
 
 # Takes input as a pickle path generated pickle file with corresponding bigrams.
-# pad left with <s>
-# pad right with </s>
+# pad left with $
+# pad right with $
 
-# (<>,'a'): ["abcd"]
+# ($,'a'): ["abcd"]
 # ('a','b'): ["abcd"]
 
 """
