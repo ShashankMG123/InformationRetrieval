@@ -255,7 +255,7 @@ if(sampleInput["query"]["mode"]):
     if("search" in sampleInput["query"]):
         AllfinalRes, timeTaken = simpleSearchOnAllFiles(sampleInput)
         print("\nTime taken by IR :", timeTaken)
-        # print(json.dumps(AllfinalRes,indent=1))
+        print(json.dumps(AllfinalRes,indent=1))
     elif("must" in sampleInput["query"]):
         simplePhraseOnAllFiles(sampleInput)
     elif("wildcard" in sampleInput["query"]):
@@ -264,7 +264,7 @@ else:
     if("search" in sampleInput["query"]):
         OnefinalRes, timeTaken = simpleSearchOnOneFile(sampleInput)
         print("\nTime taken by IR :", timeTaken)
-        # print(json.dumps(OnefinalRes,indent=1))
+        print(json.dumps(OnefinalRes,indent=1))
     elif("must" in sampleInput["query"]):
         simplePhraseOnOneFile(sampleInput)
     elif("wildcard" in sampleInput["query"]):

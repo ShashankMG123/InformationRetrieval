@@ -3,7 +3,7 @@
     {
         "mode":1,
         "fileName" : "CNN.200909",
-        "search" : ["greenhouse","gas"],
-        "top":100
+        "search" : ["barack","president"],
+        "top":15
     }
 }

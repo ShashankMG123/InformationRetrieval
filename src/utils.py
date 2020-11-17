@@ -58,10 +58,10 @@ def compareOutputs(finalRes, id):
     TN = 0
     FN = len(esKeys.difference(resKeys))
 
-    print("----------CONFUSION MATRIX------------")
+    print("\n----------CONFUSION MATRIX------------")
     print([TP,FP])
     print(f"[{FN}, X]")
-    print("-----------------METRICS-----------------")
+    print("\n-----------------METRICS-----------------")
     acc = (TP+TN)/(TP+TN+FP+FN)
 
     # handling a border case which has zero TP and FP
