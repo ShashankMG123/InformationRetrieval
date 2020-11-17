@@ -3,7 +3,7 @@
     {
         "mode":1,
         "fileName" : "CNN.200909",
-        "wildcard" : "re*" ,
-        "top":5
+        "wildcard" : "o*am*" ,
+        "top":15
     } 
 }

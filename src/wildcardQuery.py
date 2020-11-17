@@ -50,6 +50,7 @@ def getBiGrams(bigramIndex, listOfBigrams):
 def intersectionBiGrams(possibleWords):
     #  [['a'],['b'],['a']]
     # getting only the common matches 
+    possibleWords = [x for x in possibleWords if x is not None]
     possibleWords = sorted(possibleWords, key= lambda x:len(x))
     return(list(reduce(lambda x,y: set(x) & set(y), possibleWords)))
 
